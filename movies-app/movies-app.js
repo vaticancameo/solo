@@ -2,6 +2,8 @@ WatchedMovies = new Mongo.Collection("watchedMovies");
 ToWatchMovies = new Mongo.Collection("toWatchMovies");
 
 if (Meteor.isClient) {
+  Meteor.subscribe("watchedMovies");
+  Meteor.subscribe("toWatchMovies");
   // This code only runs on the client
   Template.body.helpers({
     watchedMovies: function () {
@@ -18,14 +20,9 @@ if (Meteor.isClient) {
       // This function is called when the new task form is submitted
       var title = event.target.title.value;
 
-      WatchedMovies.insert({
-        title: title,
-        createdAt: new Date() // current time
-      });
-
+      Meteor.call("addWatchedMovie", title);
       // Clear form
       event.target.title.value = "";
-
       // Prevent default form submit
       return false;
     },
@@ -33,26 +30,56 @@ if (Meteor.isClient) {
       // This function is called when the new task form is submitted
       var title = event.target.title.value;
 
-      ToWatchMovies.insert({
-        title: title,
-        createdAt: new Date() // current time
-      });
-
+      Meteor.call("addToWatchMovie", title);
       // Clear form
       event.target.title.value = "";
-
       // Prevent default form submit
       return false;
     }
   });
 
-  // Template.movies.events({
-  //   "click .toggle-checked": function (e) {
-  //     // Set the checked property to the opposite of its current value
-  //     toWatchMovies.update(this._id, {$set: {checked: ! this.checked}});
-  //   },
-  //   "click .delete": function (e) {
-  //     toWatchMovies.remove(this._id);
-  //   }
-  // });
+
+  Accounts.ui.config({
+    passwordSignupFields: "USERNAME_ONLY"
+  });
+}
+
+
+Meteor.methods({
+  addToWatchMovie: function (title) {
+    // Make sure the user is logged in before inserting a task
+    if (! Meteor.userId()) {
+      throw new Meteor.Error("not-authorized");
+    }
+
+    ToWatchMovies.insert({
+      title: title,
+      createdAt: new Date(),
+      owner: Meteor.userId(),
+      username: Meteor.user().username
+    });
+  },
+
+  addWatchedMovie: function (title) {
+    if (! Meteor.userId()) {
+      throw new Meteor.Error("not-authorized");
+    }
+
+    WatchedMovies.insert({
+      title: title,
+      createdAt: new Date(),
+      owner: Meteor.userId(),
+      username: Meteor.user().username
+    });
+  }
+});
+
+if (Meteor.isServer) {
+  Meteor.publish("watchedMovies", function () {
+    return WatchedMovies.find();
+  });
+
+  Meteor.publish("toWatchMovies", function () {
+    return ToWatchMovies.find();
+  });
 }
