@@ -18,16 +18,16 @@ Once the project moves into development, the press release can be used as a touc
  
 ## Heading ##
   > Name the product in a way the reader (i.e. your target customers) will understand.
-
+  I heart Movies
 ## Sub-Heading ##
   > Describe who the market for the product is and what benefit they get. One sentence only underneath the title.
-
+  Keep track of which movies you've seen and which movies you'd like to watch
 ## Summary ##
   > Give a summary of the product and the benefit. Assume the reader will not read anything else so make this paragraph good.
-
+  Don't remember which movies you've seen? Tired of keeping movies stubs? Don't remember which trailers you've seen that looked interesting? Keep a profile of movies you've seen and would like to see with I heart Movies.
 ## Problem ##
   > Describe the problem your product solves.
-
+  
 ## Solution ##
   > Describe how your product elegantly solves the problem.
 

@@ -1,0 +1,47 @@
+
+<head>
+  <title>Cinephile</title>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>My Movies</h1>
+    </header>
+
+    <section>
+    <h2>Movies I've seen</h2>
+      <form class="new-wmovie">
+        <input type="text" name="title" placeholder="Add a movie" />
+      </form>
+      <ul>
+      {{#each watchedMovies}}
+        {{> movies}}
+      {{/each}}
+    </ul>
+    </section>
+      
+    <section>
+    <h2>Movies I want to watch</h2>
+      <form class="new-tmovie">
+        <input type="text" name="title" placeholder="Add a movie" />
+      </form>
+      <ul>
+      {{#each toWatchMovies}}
+        {{> movies}}
+      {{/each}}
+    </ul>
+    </section>
+  </div>
+</body>
+
+
+<template name="movies">
+  <li class="{{#if checked}}checked{{/if}}">
+<!--     <button class="delete">&times;</button>
+
+    <input type="checkbox" checked="{{checked}}" class="toggle-checked" /> -->
+
+    <span class="title">{{title}}</span>
+  </li>
+</template>
