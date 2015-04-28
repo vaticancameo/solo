@@ -15,23 +15,23 @@
 
     {{#if currentUser}}
     <div class='loggedin'>
-      <section>
+      <form class="new-movie">
+        <input type="text" name="title" placeholder="Add a movie to" />
+        <input type="radio" name='where' value='watched' checked/>movies I've seen<br>
+        <input type="radio" name='where' value='toWatch'/>movies I want to watch<br>
+      </form>
+      <section class='watched'>
         <h2>Movies I've seen</h2>
-          <form class="new-wmovie">
-            <input type="text" name="title" placeholder="Add a movie" />
-          </form>
-          <ul>
+
+          <div>
           {{#each watchedMovies}}
             {{> movies}}
           {{/each}}
-        </ul>
+        </div>
       </section>
         
-      <section>
+      <section class='toWatch'>
         <h2>Movies I want to watch</h2>
-          <form class="new-tmovie">
-            <input type="text" name="title" placeholder="Add a movie" />
-          </form>
           <ul>
           {{#each toWatchMovies}}
             {{> movies}}
@@ -48,6 +48,7 @@
 <template name="movies">
   <li class='movie'>
     <span class="title">{{title}}</span>
-    <img src='{{image}}' alt="{{ title }}" height=280px>
+    <img class="image" src='{{image}}' alt="{{ title }}" height=280px width=190px>
+    <button class="delete">&times;</button>
   </li>
 </template>

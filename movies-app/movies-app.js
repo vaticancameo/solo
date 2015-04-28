@@ -15,22 +15,28 @@ if (Meteor.isClient) {
   });
 
   Template.body.events({
-    "submit .new-wmovie": function (event) {
+    "submit .new-movie": function (event) {
+      var where = $('input[name="where"]:checked').val();
       var title = event.target.title.value;
-      Meteor.call("addWatchedMovie", title);
+      if (where === 'watched') {
+        Meteor.call("addMovie", title, where);
+      } else {
+        Meteor.call("addMovie", title, where);
+      }
       // Clear form
       event.target.title.value = "";
       // Prevent default form submit
       return false;
     },
-    "submit .new-tmovie": function (event) {
-      var title = event.target.title.value;
-      Meteor.call("addToWatchMovie", title);
-      // Clear form
-      event.target.title.value = "";
-      // Prevent default form submit
-      return false;
+
+    "click .watched .delete": function () {
+      Meteor.call('deleteMovie', this._id, 'watched');
+    },
+
+    "click .toWatch .delete": function () {
+      Meteor.call('deleteMovie', this._id, 'toWatch');
     }
+
   });
 
   Accounts.ui.config({
@@ -40,35 +46,15 @@ if (Meteor.isClient) {
 
 Meteor.methods({
 
-  addWatchedMovie: function (title) {
-    var t = title.split(' ').join('+');
-    var url = 'http://www.omdbapi.com/?t='+t+'&r=json';
-    var image = '';
-
-    if (! Meteor.userId()) {
-      throw new Meteor.Error("not-authorized");
+  deleteMovie: function (movieId, where) {
+    if (where === "watched") {
+      WatchedMovies.remove(movieId);
+    } else {
+      ToWatchMovies.remove(movieId);
     }
-    HTTP.get(url, function (error, result) {
-      if (error) {
-        console.log(error);
-      } else if (JSON.parse(result.content).Error) {
-        //display movie not found
-        console.log('movie not found');        
-      } else {
-        image = JSON.parse(result.content).Poster;
-
-        WatchedMovies.insert({
-          title: title,
-          createdAt: new Date(),
-          owner: Meteor.userId(),
-          username: Meteor.user().username,
-          image: image
-        });
-      }
-    });
   },
 
-  addToWatchMovie: function (title) {
+  addMovie: function (title, where) {
     var t = title.split(' ').join('+');
     var url = 'http://www.omdbapi.com/?t='+t+'&r=json';
     var image = '';
@@ -83,15 +69,25 @@ Meteor.methods({
         //display movie not found
         console.log('movie not found');        
       } else {
-        image = JSON.parse(result.content).Poster;
-
-        ToWatchMovies.insert({
-          title: title,
-          createdAt: new Date(),
-          owner: Meteor.userId(),
-          username: Meteor.user().username,
-          image: image
-        });
+        var data = JSON.parse(result.content);
+        image = data.Poster === 'N/A' ? 'image-not-available.jpg' : data.Poster; 
+        if (where === 'watched') {
+          WatchedMovies.insert({
+            title: title,
+            createdAt: new Date(),
+            owner: Meteor.userId(),
+            username: Meteor.user().username,
+            image: image
+          });
+        } else {
+          ToWatchMovies.insert({
+            title: title,
+            createdAt: new Date(),
+            owner: Meteor.userId(),
+            username: Meteor.user().username,
+            image: image
+          });
+        }
       }
     });
   },
