@@ -4,10 +4,9 @@ ToWatchMovies = new Mongo.Collection("toWatchMovies");
 if (Meteor.isClient) {
   Meteor.subscribe("watchedMovies");
   Meteor.subscribe("toWatchMovies");
-  // This code only runs on the client
+
   Template.body.helpers({
     watchedMovies: function () {
-      // Show newest tasks first
       return WatchedMovies.find({}, {sort: {createdAt: -1}});
     },
     toWatchMovies: function () {
@@ -17,9 +16,7 @@ if (Meteor.isClient) {
 
   Template.body.events({
     "submit .new-wmovie": function (event) {
-      // This function is called when the new task form is submitted
       var title = event.target.title.value;
-
       Meteor.call("addWatchedMovie", title);
       // Clear form
       event.target.title.value = "";
@@ -27,9 +24,7 @@ if (Meteor.isClient) {
       return false;
     },
     "submit .new-tmovie": function (event) {
-      // This function is called when the new task form is submitted
       var title = event.target.title.value;
-
       Meteor.call("addToWatchMovie", title);
       // Clear form
       event.target.title.value = "";
@@ -38,60 +33,84 @@ if (Meteor.isClient) {
     }
   });
 
-
   Accounts.ui.config({
     passwordSignupFields: "USERNAME_ONLY"
   });
 }
 
+Meteor.methods({
 
-if (Meteor.isServer) {
-  Meteor.publish("watchedMovies", function () {
-    return WatchedMovies.find();
-  });
+  addWatchedMovie: function (title) {
+    var t = title.split(' ').join('+');
+    var url = 'http://www.omdbapi.com/?t='+t+'&r=json';
+    var image = '';
 
-  Meteor.publish("toWatchMovies", function () {
-    return ToWatchMovies.find();
-  });
-
-  Meteor.methods({
-  addToWatchMovie: function (title) {
-    // Make sure the user is logged in before inserting a task
     if (! Meteor.userId()) {
       throw new Meteor.Error("not-authorized");
     }
-    // HTTP.get('http://www.omdbapi.com/?t=Gone+Girl&r=json', function (error, result) {
-    //   if (error) {console.log(error)};
-    //   image = JSON.stringify(JSON.parse(result.content).Poster);
-    //  });
-    var t = title.split(' ').join('+');
-    console.log(title);
-    var baseUrl = 'http://www.omdbapi.com/?t=';
-    var image = JSON.parse(HTTP.get(baseUrl + t +'&r=json').content).Poster;
+    HTTP.get(url, function (error, result) {
+      if (error) {
+        console.log(error);
+      } else if (JSON.parse(result.content).Error) {
+        //display movie not found
+        console.log('movie not found');        
+      } else {
+        image = JSON.parse(result.content).Poster;
 
-    console.log('-------------------', image);
-
-    ToWatchMovies.insert({
-      title: title,
-      createdAt: new Date(),
-      owner: Meteor.userId(),
-      username: Meteor.user().username,
-      image: image
+        WatchedMovies.insert({
+          title: title,
+          createdAt: new Date(),
+          owner: Meteor.userId(),
+          username: Meteor.user().username,
+          image: image
+        });
+      }
     });
   },
 
-  addWatchedMovie: function (title) {
+  addToWatchMovie: function (title) {
+    var t = title.split(' ').join('+');
+    var url = 'http://www.omdbapi.com/?t='+t+'&r=json';
+    var image = '';
+
     if (! Meteor.userId()) {
       throw new Meteor.Error("not-authorized");
     }
+    HTTP.get(url, function (error, result) {
+      if (error) {
+        console.log(error);
+      } else if (JSON.parse(result.content).Error) {
+        //display movie not found
+        console.log('movie not found');        
+      } else {
+        image = JSON.parse(result.content).Poster;
 
-    WatchedMovies.insert({
-      title: title,
-      createdAt: new Date(),
-      owner: Meteor.userId(),
-      username: Meteor.user().username,
-      image: image
+        ToWatchMovies.insert({
+          title: title,
+          createdAt: new Date(),
+          owner: Meteor.userId(),
+          username: Meteor.user().username,
+          image: image
+        });
+      }
     });
-  }
+  },
 });
+
+if (Meteor.isServer) {
+  // WatchedMovies.allow({
+  //   'insert': function (userId, doc) {
+  //     return true;
+  //   }
+  // });
+
+  Meteor.publish("watchedMovies", function () {
+    return WatchedMovies.find({owner: this.userId});
+  });
+
+  Meteor.publish("toWatchMovies", function () {
+    return ToWatchMovies.find({owner: this.userId});
+  });
+
+
 }
