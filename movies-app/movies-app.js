@@ -87,6 +87,10 @@ Meteor.methods({
   },
 
   addMovie: function (title, where) {
+    // if (WatchedMovies.findOne({title: title, owner: Meteor.userId()}) !== null) {
+    //   console.log('movie already in list!')
+    //   return;
+    // }
     var t = title.split(' ').join('+');
     var url = 'http://www.omdbapi.com/?t='+t+'&r=json';
     var image = '';
@@ -130,11 +134,6 @@ Meteor.methods({
 });
 
 if (Meteor.isServer) {
-  // WatchedMovies.allow({
-  //   'insert': function (userId, doc) {
-  //     return true;
-  //   }
-  // });
 
   Meteor.publish("watchedMovies", function () {
     return WatchedMovies.find({owner: this.userId});
