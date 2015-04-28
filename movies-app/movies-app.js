@@ -45,18 +45,38 @@ if (Meteor.isClient) {
 }
 
 
-Meteor.methods({
+if (Meteor.isServer) {
+  Meteor.publish("watchedMovies", function () {
+    return WatchedMovies.find();
+  });
+
+  Meteor.publish("toWatchMovies", function () {
+    return ToWatchMovies.find();
+  });
+
+  Meteor.methods({
   addToWatchMovie: function (title) {
     // Make sure the user is logged in before inserting a task
     if (! Meteor.userId()) {
       throw new Meteor.Error("not-authorized");
     }
+    // HTTP.get('http://www.omdbapi.com/?t=Gone+Girl&r=json', function (error, result) {
+    //   if (error) {console.log(error)};
+    //   image = JSON.stringify(JSON.parse(result.content).Poster);
+    //  });
+    var t = title.split(' ').join('+');
+    console.log(title);
+    var baseUrl = 'http://www.omdbapi.com/?t=';
+    var image = JSON.parse(HTTP.get(baseUrl + t +'&r=json').content).Poster;
+
+    console.log('-------------------', image);
 
     ToWatchMovies.insert({
       title: title,
       createdAt: new Date(),
       owner: Meteor.userId(),
-      username: Meteor.user().username
+      username: Meteor.user().username,
+      image: image
     });
   },
 
@@ -69,17 +89,9 @@ Meteor.methods({
       title: title,
       createdAt: new Date(),
       owner: Meteor.userId(),
-      username: Meteor.user().username
+      username: Meteor.user().username,
+      image: image
     });
   }
 });
-
-if (Meteor.isServer) {
-  Meteor.publish("watchedMovies", function () {
-    return WatchedMovies.find();
-  });
-
-  Meteor.publish("toWatchMovies", function () {
-    return ToWatchMovies.find();
-  });
 }
