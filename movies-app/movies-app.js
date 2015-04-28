@@ -77,7 +77,9 @@ Meteor.methods({
             createdAt: new Date(),
             owner: Meteor.userId(),
             username: Meteor.user().username,
-            image: image
+            image: image,
+            year: data.Year,
+            released: data.Released
           });
         } else {
           ToWatchMovies.insert({
@@ -85,7 +87,9 @@ Meteor.methods({
             createdAt: new Date(),
             owner: Meteor.userId(),
             username: Meteor.user().username,
-            image: image
+            image: image,
+            year: data.Year,
+            released: data.Released
           });
         }
       }

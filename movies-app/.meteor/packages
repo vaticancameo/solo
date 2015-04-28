@@ -6,6 +6,7 @@
 
 meteor-platform
 http
-accounts-ui
 accounts-password
 twbs:bootstrap
+less
+ian:accounts-ui-bootstrap-3
