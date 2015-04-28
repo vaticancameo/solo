@@ -4,13 +4,36 @@ ToWatchMovies = new Mongo.Collection("toWatchMovies");
 if (Meteor.isClient) {
   Meteor.subscribe("watchedMovies");
   Meteor.subscribe("toWatchMovies");
+  
+  Session.setDefault('oldest-release' ,false);
+  Session.setDefault('newest-release' ,false);
+  Session.setDefault('oldest-added' ,false);
+  Session.setDefault('newest-added' ,false);
+  Session.setDefault('default' ,true);
 
   Template.body.helpers({
     watchedMovies: function () {
-      return WatchedMovies.find({}, {sort: {createdAt: -1}});
+      if (Session.get("newest-release")) {
+        return WatchedMovies.find({}, {sort: {released: -1}});
+      } else if (Session.get("oldest-release")) {
+        return WatchedMovies.find({}, {sort: {released: 1}});
+      } else if (Session.get("oldest-added")) {
+        return WatchedMovies.find({}, {sort: {createdAt: 1}});
+      } else {
+        return WatchedMovies.find({}, {sort: {createdAt: -1}});
+      }
     },
+
     toWatchMovies: function () {
-      return ToWatchMovies.find({}, {sort: {createdAt: -1}});
+      if (Session.get("newest-release")) {
+        return ToWatchMovies.find({}, {sort: {released: -1}});
+      } else if (Session.get("oldest-release")) {
+        return ToWatchMovies.find({}, {sort: {released: 1}});
+      } else if (Session.get("oldest-added")) {
+        return ToWatchMovies.find({}, {sort: {createdAt: 1}});
+      } else {
+        return ToWatchMovies.find({}, {sort: {createdAt: -1}});
+      }
     }
   });
 
@@ -35,6 +58,15 @@ if (Meteor.isClient) {
 
     "click .toWatch .delete": function () {
       Meteor.call('deleteMovie', this._id, 'toWatch');
+    },
+
+    "change select" : function (event) {
+      Session.set('newest-release', false);
+      Session.set('oldest-release', false);
+      Session.set('newest-added', false);
+      Session.set('oldest-added', false);
+      Session.set('default', false);
+      Session.set(event.target.value, true);
     }
 
   });
