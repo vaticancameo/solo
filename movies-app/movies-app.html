@@ -6,16 +6,18 @@
 </head>
 
 <body>
+  <nav class='navbar navbar-default navbar-static-top login'>
+  <div class='container-fluid'>
+  {{> loginButtons}}
+  </div>
+  </nav>
 
   <div class="container-fluid">
     <header>
       <h1>Movies</h1>
     </header>
 
-    <div class='login'>
-    {{> loginButtons}}
-    </div>
-
+ 
     {{#if currentUser}}
     <div class='loggedin'>
 
