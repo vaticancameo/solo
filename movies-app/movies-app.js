@@ -11,6 +11,8 @@ if (Meteor.isClient) {
   Session.setDefault('newest-added' ,false);
   Session.setDefault('default' ,true);
 
+  Session.setDefault('notFound', false);
+
   Template.body.helpers({
     watchedMovies: function () {
       if (Session.get("newest-release")) {
@@ -34,7 +36,12 @@ if (Meteor.isClient) {
       } else {
         return ToWatchMovies.find({}, {sort: {createdAt: -1}});
       }
+    },
+
+    notFound: function() {
+      return Session.get('notFound');
     }
+
   });
 
   Template.body.events({
@@ -102,8 +109,11 @@ Meteor.methods({
       if (error) {
         console.log(error);
       } else if (JSON.parse(result.content).Error) {
-        //display movie not found
-        console.log('movie not found');        
+        Session.set('notFound', true);
+        console.log('movie not found'); 
+        setTimeout(function(){
+          Session.set('notFound', false);
+        }, 2000);       
       } else {
         var data = JSON.parse(result.content);
         image = data.Poster === 'N/A' ? 'image-not-available.jpg' : data.Poster; 
